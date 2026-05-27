@@ -2,6 +2,7 @@
 if(session_status() === PHP_SESSION_NONE){
         session_start();
     }
+require_once __DIR__ . "/../conexao.php";
 
 function gerarId($lista){
     if(empty($lista))return 1;

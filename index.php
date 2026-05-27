@@ -63,11 +63,14 @@
                             <li class="nav-item">
                                 <a class="nav-link <?= $pagina == 'dash' ? 'active' : '' ?>" href="index.php?p=dash">DashBoard</a>
                             </li>
+                            <li class="nav-item ms-lg-2">
+                                    <li class="nav-item"><a class="nav-link text-danger"  href="logout.php">Sair</a></li>
+                            </li>
                             
                     
                         <?php endif; ?>
                             
-                        <?php if ($_SESSION['usuario_nivel'] !== 'admin'): ?>
+                        <?php if ($_SESSION['usuario_nivel'] === 'cliente'): ?>
                             
                             <li class="nav-item">
                                 <a class="nav-link <?= $pagina == 'Orcamento' ? 'active' : '' ?>" href="index.php?p=Orcamento">Orçamento</a>
@@ -78,7 +81,7 @@
                         
                             <li class="nav-item ms-lg-2">
                                 <a class="btn btn-outline-light btn-sm mt-1" href="logout.php">
-                                    Sair (<?= explode(' ', $_SESSION['usuario_nome'] ?? 'Usuário')[0] ?>)
+                                    Sair
                                 </a>
                             </li>
                         
@@ -116,7 +119,7 @@
                         echo "
                         <div class='p-5 mb-4 bg-white border rounded-3 shadow-sm'>
                             <div class='container-fluid py-5 text-center'>
-                                <h1 class='display-4 fw-bold text-dark'>Bem-vindo(a) à Oficina.</h1>
+                                <h1 class='display-4 fw-bold text-dark'>Bem vindo(a) à Oficina.</h1>
                                 <hr class='my-4 mx-auto w-25'>
                                 $botoes
                             </div>
@@ -137,7 +140,6 @@
                         include 'view/login.php';
                         break;
                     case 'servicos':
-                        verificarAcesso('admin');
                         include 'view/servicosCadastrados.php';
                         break;
                     case 'Orcamento':

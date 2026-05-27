@@ -16,6 +16,10 @@
                         <div class="mb-3">
                             <label class="form-label fw-bold d-block">Nível de Acesso</label>
                             <div class="btn-group w-100" role="group" aria-label="Níveis de acesso">
+
+                                <input type="radio" class="btn-check" name="nivel" id="admin" value="admin" required>
+                                <label class="btn btn-outline-danger" for="admin">Admin</label>
+
                                 <input type="radio" class="btn-check" name="nivel" id="pro" value="pro" required>
                                 <label class="btn btn-outline-danger" for="pro">Pro</label>
 
@@ -72,13 +76,14 @@
                                     <?php foreach ($_SESSION['usuarios'] as $usuario): ?>
                                         <tr>
                                             <td>
-                                                <div class="fw-bold"><?= $usuario['nome'] ?></div>
+                                                <div class="fw-bold"><?= $usuario['id'] ,"-", $usuario['nome']  ?></div>
                                                 <small class="text-muted"><?= $usuario['email'] ?? 'Sem e-mail' ?></small>
                                             </td>
                                             <td>
                                                 <?php 
                                                     $cor = 'bg-secondary';
-                                                    if($usuario['nivel'] == 'Pro master') $cor = 'bg-danger';
+                                                    if($usuario['nivel'] == 'Admin') $cor = 'bg-dark';
+                                                    if($usuario['nivel'] == 'Pro Master') $cor = 'bg-danger';
                                                     if($usuario['nivel'] == 'Master') $cor = 'bg-warning text-dark';
                                                     if($usuario['nivel'] == 'Usuario') $cor = 'bg-primary';
                                                 ?>

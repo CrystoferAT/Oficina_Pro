@@ -3,7 +3,13 @@
 <nav class="navbar navbar-dark bg-dark shadow-sm mb-3">
     <div class="container">
         <ul class="navbar-nav d-flex flex-row gap-3">
-            <li class="nav-item"><a class="nav-link text-danger"  href="logout.php">Sair</a></li>
+           <li class="nav-item text-white">
+                <i class="bi bi-person-circle me-1"></i>
+                <strong><?= explode(' ', $_SESSION['usuario_nome'] ?? 'Usuário')[0] ?></strong> 
+                <span class="badge bg-secondary ms-1" style="font-size: 0.7rem;">
+                    <?= $_SESSION['usuario_nivel'] ?? '' ?>
+                </span>
+            </li>
         </ul>
     </div>
 </nav>
