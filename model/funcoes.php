@@ -4,11 +4,6 @@ if(session_status() === PHP_SESSION_NONE){
     }
 require_once __DIR__ . "/../conexao.php";
 
-function gerarId($lista){
-    if(empty($lista))return 1;
-    $ultimo = end($lista);
-    return $ultimo["id"] + 1;
-}
 
 function validarLogin($email, $pass) {
     if (isset($_SESSION['usuarios'])) {
