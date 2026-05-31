@@ -34,4 +34,3 @@ Este sistema foi desenvolvido para aplicar conceitos de arquitetura de software,
 ## 🏛️ Instituição
 **Universidade Positivo**  
 **Campus:** Osório  
-**Docente:** [Marcelo Fassina]
