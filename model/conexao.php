@@ -1,5 +1,5 @@
 <?php
-    $banco = new mysqli("localhost", "root","", "oficina_pro", 3307 );
+    $banco = new mysqli ("localhost", "root","", "oficina_pro");
 
     if($banco->connect_error){
         die("Erro na conexão". $banco->connect_error);

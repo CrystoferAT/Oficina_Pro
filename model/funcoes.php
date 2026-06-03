@@ -2,7 +2,7 @@
 if(session_status() === PHP_SESSION_NONE){
         session_start();
     }
-require_once __DIR__ . "/../conexao.php";
+require_once __DIR__ . "/conexao.php";
 
 
 function validarLogin($email, $pass) {
@@ -31,6 +31,16 @@ function validarLogin($email, $pass) {
     }
     
     return false;
+}
+
+function gerarId($array) {
+    if (empty($array)) {
+        return 1;
+    }
+    
+    $ultimoElemento = end($array);
+    
+    return isset($ultimoElemento['id']) ? $ultimoElemento['id'] + 1 : count($array) + 1;
 }
 
 function formatarMoeda($valor) {

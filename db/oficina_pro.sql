@@ -24,6 +24,35 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `carrinho`
+--
+
+CREATE TABLE `carrinho` (
+  `id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `servico_id` int(11) NOT NULL,
+  `quantidade` int(11) DEFAULT 1,
+  `adicionado_em` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `pagamentos`
+--
+
+CREATE TABLE `pagamentos` (
+  `id` int(11) NOT NULL,
+  `pedido_id` int(11) NOT NULL,
+  `metodo` varchar(50) NOT NULL, -- PIX, Cartão de Crédito, Dinheiro
+  `valor_pago` decimal(10,2) NOT NULL,
+  `status_pagamento` enum('aprovado','pendente','recusado') DEFAULT 'aprovado',
+  `data_pagamento` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `pedidos`
 --
 
@@ -32,6 +61,7 @@ CREATE TABLE `pedidos` (
   `usuario_id` int(11) NOT NULL,
   `total` decimal(10,2) DEFAULT NULL,
   `status` enum('pendente','aprovado','cancelado') DEFAULT 'pendente',
+  `metodo_pagamento` varchar(50) DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -83,6 +113,21 @@ CREATE TABLE `usuarios` (
 --
 
 --
+-- Indexes for table `carrinho`
+--
+ALTER TABLE `carrinho`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `usuario_id` (`usuario_id`),
+  ADD KEY `servico_id` (`servico_id`);
+
+--
+-- Indexes for table `pagamentos`
+--
+ALTER TABLE `pagamentos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `pedido_id` (`pedido_id`);
+
+--
 -- Indexes for table `pedidos`
 --
 ALTER TABLE `pedidos`
@@ -115,6 +160,18 @@ ALTER TABLE `usuarios`
 --
 
 --
+-- AUTO_INCREMENT for table `carrinho`
+--
+ALTER TABLE `carrinho`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `pagamentos`
+--
+ALTER TABLE `pagamentos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `pedidos`
 --
 ALTER TABLE `pedidos`
@@ -141,6 +198,19 @@ ALTER TABLE `usuarios`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `carrinho`
+--
+ALTER TABLE `carrinho`
+  ADD CONSTRAINT `carrinho_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
+  ADD CONSTRAINT `carrinho_ibfk_2` FOREIGN KEY (`servico_id`) REFERENCES `servicos` (`id`);
+
+--
+-- Constraints for table `pagamentos`
+--
+ALTER TABLE `pagamentos`
+  ADD CONSTRAINT `pagamentos_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`);
 
 --
 -- Constraints for table `pedidos`
