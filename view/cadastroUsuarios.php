@@ -1,4 +1,19 @@
 <div class="container mt-4">
+
+    <?php if (isset($_GET['sucesso'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            Funcionário cadastrado com sucesso!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_GET['erro']) && $_GET['erro'] === 'email_duplicado'): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            Este e-mail já está cadastrado no sistema.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row">
         <div class="col-lg-4">
             <div class="card shadow-sm border-0">
@@ -7,7 +22,7 @@
                 </div>
                 <div class="card-body">
                     <form action="controller/CadastroUsuarioController.php" method="post">
-                        
+
                         <div class="mb-3">
                             <label class="form-label fw-bold">Nome Completo</label>
                             <input type="text" name="nome" class="form-control" placeholder="Ex: João Silva" required>
@@ -15,20 +30,15 @@
 
                         <div class="mb-3">
                             <label class="form-label fw-bold d-block">Nível de Acesso</label>
-                            <div class="btn-group w-100" role="group" aria-label="Níveis de acesso">
-
+                            <div class="btn-group w-100" role="group">
                                 <input type="radio" class="btn-check" name="nivel" id="admin" value="admin" required>
                                 <label class="btn btn-outline-danger" for="admin">Admin</label>
 
-                                <input type="radio" class="btn-check" name="nivel" id="pro" value="pro" required>
-                                <label class="btn btn-outline-danger" for="pro">Pro</label>
+                                <input type="radio" class="btn-check" name="nivel" id="funcionario" value="funcionario">
+                                <label class="btn btn-outline-warning" for="funcionario">Funcionário</label>
 
-                                <input type="radio" class="btn-check" name="nivel" id="master" value="Master">
-                                <label class="btn btn-outline-warning" for="master">Master</label>
-
-                                <input type="radio" class="btn-check" name="nivel" id="user" value="Usuario">
-                                <label class="btn btn-outline-primary" for="user">Usuário</label>
-                                
+                                <input type="radio" class="btn-check" name="nivel" id="cliente" value="cliente">
+                                <label class="btn btn-outline-primary" for="cliente">Cliente</label>
                             </div>
                         </div>
 
@@ -57,9 +67,12 @@
 
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
+                <?php
+                    $usuarios = listarUsuarios();
+                ?>
                 <div class="card-header bg-light py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 text-dark">Funcionários Ativos</h5>
-                    <span class="badge bg-dark"><?= count($_SESSION['usuarios'] ?? []) ?> usuários</span>
+                    <span class="badge bg-dark"><?= count($usuarios) ?> usuários</span>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -72,20 +85,19 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if (!empty($_SESSION['usuarios'])): ?>
-                                    <?php foreach ($_SESSION['usuarios'] as $usuario): ?>
+                                <?php if (!empty($usuarios)): ?>
+                                    <?php foreach ($usuarios as $usuario): ?>
                                         <tr>
                                             <td>
-                                                <div class="fw-bold"><?= $usuario['id'] ,"-", $usuario['nome']  ?></div>
-                                                <small class="text-muted"><?= $usuario['email'] ?? 'Sem e-mail' ?></small>
+                                                <div class="fw-bold"><?= $usuario['id'] . " - " . htmlspecialchars($usuario['nome']) ?></div>
+                                                <small class="text-muted"><?= htmlspecialchars($usuario['email']) ?></small>
                                             </td>
                                             <td>
-                                                <?php 
+                                                <?php
                                                     $cor = 'bg-secondary';
-                                                    if($usuario['nivel'] == 'Admin') $cor = 'bg-dark';
-                                                    if($usuario['nivel'] == 'Pro Master') $cor = 'bg-danger';
-                                                    if($usuario['nivel'] == 'Master') $cor = 'bg-warning text-dark';
-                                                    if($usuario['nivel'] == 'Usuario') $cor = 'bg-primary';
+                                                    if ($usuario['nivel'] === 'admin')       $cor = 'bg-dark';
+                                                    if ($usuario['nivel'] === 'funcionario') $cor = 'bg-warning text-dark';
+                                                    if ($usuario['nivel'] === 'cliente')     $cor = 'bg-primary';
                                                 ?>
                                                 <span class="badge rounded-pill <?= $cor ?>"><?= $usuario['nivel'] ?></span>
                                             </td>
