@@ -1,12 +1,13 @@
 <?php
-if(session_status() === PHP_SESSION_NONE){
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 require_once __DIR__ . "/conexao.php";
 
+// ─── LOGIN ───────────────────────────────────────────────────────────────────
 
 function validarLogin($email, $pass) {
-    global $banco;
+    $banco = getConexao();
 
     $stmt = $banco->prepare("SELECT id, nome, nivel, senha FROM usuarios WHERE email = ?");
     $stmt->bind_param("s", $email);
@@ -15,89 +16,37 @@ function validarLogin($email, $pass) {
 
     if ($resultado->num_rows === 1) {
         $usuario = $resultado->fetch_assoc();
+        $stmt->close();
 
-        $senhaValida = password_verify($pass, $usuario['senha']) || $pass === $usuario['senha'];
-
-        if ($senhaValida) {
+        if (password_verify($pass, $usuario['senha'])) {
             $_SESSION['usuario_id']    = $usuario['id'];
             $_SESSION['usuario_nome']  = $usuario['nome'];
             $_SESSION['usuario_nivel'] = $usuario['nivel'];
             $_SESSION['autenticado']   = true;
             return true;
         }
+    } else {
+        $stmt->close();
     }
 
     return false;
 }
 
-function gerarId($array) {
-    if (empty($array)) {
-        return 1;
-    }
-    $ultimoElemento = end($array);
-    return isset($ultimoElemento['id']) ? $ultimoElemento['id'] + 1 : count($array) + 1;
-}
-
-function formatarMoeda($valor) {
-    return "R$ " . number_format($valor, 2, ',', '.');
-}
-
-if(!isset($_SESSION['servicos_cadastrados'])){
-    $_SESSION['servicos_cadastrados']=[];
-}
-
-function salvarServico($dados){
-    $total = (float)$dados['precoServico']+(float)$dados['precoPeca'];
-    $id = gerarId($_SESSION['servico']);
-    $novoServico = [
-        'id'           => $id,
-        'servico'      => $dados['servico'],
-        'tempo'        => $dados['tempo'],
-        'precoServico' => (float)$dados['precoServico'],
-        'pecas'        => $dados['pecas'],
-        'precoPeca'    => (float)$dados['precoPeca'],
-        'valorTotal'   => $total
-    ];
-    $_SESSION['servicos_cadastrados'][] = $novoServico;
-}
-
-function listarServicos(){
-    return $_SESSION['servicos_cadastrados'] ?? [];
-}
-
-function editarServicos($indice, $novosDados){
-    if(isset($_SESSION['servicos_cadastrados'][$indice])){
-        $total = (float)$novosDados['precoServico']+(float)$novosDados['precoPeca'];
-        $_SESSION['servicos_cadastrados'][$indice] = [
-            'servico'      => $novosDados['servico'],
-            'precoServico' => (float)$novosDados['precoServico'],
-            'pecas'        => $novosDados['pecas'],
-            'precoPeca'    => (float)$novosDados['precoPeca'],
-            'valorTotal'   => $total
-        ];
-        return true;
-    }
-    return false;
-}
-
-function excluirServicos($indice){
-    if(isset($_SESSION['servicos_cadastrados'][$indice])){
-        unset($_SESSION['servicos_cadastrados'][$indice]);
-        $_SESSION['servicos_cadastrados'] = array_values($_SESSION['servicos_cadastrados']);
-        return true;
-    }
-    return false;
-}
+// ─── USUÁRIOS ─────────────────────────────────────────────────────────────────
 
 function cadastrarUsuario($dadosUsuario) {
-    global $banco;
+    $banco = getConexao();
 
+    // Verifica e-mail duplicado
     $stmt = $banco->prepare("SELECT id FROM usuarios WHERE email = ?");
     $stmt->bind_param("s", $dadosUsuario['email']);
     $stmt->execute();
     $stmt->store_result();
-    if ($stmt->num_rows > 0) {
-        return false; // e-mail já cadastrado
+    $existe = $stmt->num_rows > 0;
+    $stmt->close(); // IMPORTANTE: fechar antes do próximo prepare
+
+    if ($existe) {
+        return false;
     }
 
     $senhaHash = password_hash($dadosUsuario['senha'], PASSWORD_DEFAULT);
@@ -110,14 +59,19 @@ function cadastrarUsuario($dadosUsuario) {
         $senhaHash
     );
 
-    return $stmt->execute();
+    $resultado = $stmt->execute();
+    $stmt->close();
+
+    return $resultado;
 }
 
 function listarUsuarios() {
-    global $banco;
+    $banco = getConexao();
     $resultado = $banco->query("SELECT id, nome, email, nivel FROM usuarios ORDER BY id ASC");
     return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
 }
+
+// ─── CAPTCHA ──────────────────────────────────────────────────────────────────
 
 function gerarCaptcha() {
     $n1 = rand(1, 9);
@@ -126,37 +80,65 @@ function gerarCaptcha() {
     return "Quanto é $n1 + $n2?";
 }
 
-function cadastrarCliente($nome, $email, $senha) {
-    if (empty($nome) || empty($email) || empty($senha)) {
-        return false;
-    }
+// ─── SERVIÇOS (em sessão) ────────────────────────────────────────────────────
 
-    if (!isset($_SESSION['clientes'])) {
-        $_SESSION['clientes'] = [];
-    }
+if (!isset($_SESSION['servicos_cadastrados'])) {
+    $_SESSION['servicos_cadastrados'] = [];
+}
 
-    foreach ($_SESSION['clientes'] as $c) {
-        if ($c['email'] === $email) {
-            return false;
-        }
-    }
+function gerarId($array) {
+    if (empty($array)) return 1;
+    $ultimo = end($array);
+    return isset($ultimo['id']) ? $ultimo['id'] + 1 : count($array) + 1;
+}
 
-    $id = gerarId($_SESSION['clientes']);
+function formatarMoeda($valor) {
+    return "R$ " . number_format($valor, 2, ',', '.');
+}
 
-    $_SESSION['clientes'][] = [
-        'id'    => $id,
-        'nome'  => $nome,
-        'email' => $email,
-        'senha' => $senha,
-        'nivel' => 'cliente'
+function salvarServico($dados) {
+    $total = (float)$dados['precoServico'] + (float)$dados['precoPeca'];
+    $id    = gerarId($_SESSION['servicos_cadastrados']);
+    $_SESSION['servicos_cadastrados'][] = [
+        'id'           => $id,
+        'servico'      => $dados['servico'],
+        'tempo'        => $dados['tempo'],
+        'precoServico' => (float)$dados['precoServico'],
+        'pecas'        => $dados['pecas'],
+        'precoPeca'    => (float)$dados['precoPeca'],
+        'valorTotal'   => $total
     ];
-
-    return true;
 }
 
-function listarClientes(){
-    return $_SESSION['clientes'] ?? [];
+function listarServicos() {
+    return $_SESSION['servicos_cadastrados'] ?? [];
 }
+
+function editarServicos($indice, $novosDados) {
+    if (isset($_SESSION['servicos_cadastrados'][$indice])) {
+        $total = (float)$novosDados['precoServico'] + (float)$novosDados['precoPeca'];
+        $_SESSION['servicos_cadastrados'][$indice] = [
+            'servico'      => $novosDados['servico'],
+            'precoServico' => (float)$novosDados['precoServico'],
+            'pecas'        => $novosDados['pecas'],
+            'precoPeca'    => (float)$novosDados['precoPeca'],
+            'valorTotal'   => $total
+        ];
+        return true;
+    }
+    return false;
+}
+
+function excluirServicos($indice) {
+    if (isset($_SESSION['servicos_cadastrados'][$indice])) {
+        unset($_SESSION['servicos_cadastrados'][$indice]);
+        $_SESSION['servicos_cadastrados'] = array_values($_SESSION['servicos_cadastrados']);
+        return true;
+    }
+    return false;
+}
+
+// ─── ORÇAMENTO ────────────────────────────────────────────────────────────────
 
 function adicionarAoOrcamento($indice) {
     $servicos = listarServicos();
@@ -175,9 +157,8 @@ function listarItensOrcamento() {
 }
 
 function calcularTotalOrcamento() {
-    $itens = listarItensOrcamento();
     $total = 0;
-    foreach ($itens as $item) {
+    foreach (listarItensOrcamento() as $item) {
         $total += $item['valorTotal'];
     }
     return $total;
@@ -196,26 +177,7 @@ function removerDoOrcamento($indice) {
     return false;
 }
 
-function verificarAcesso($nivelRequerido = null) {
-    if (!isset($_SESSION['usuario_id'])) {
-        header("Location: index.php?p=login&erro=restrito");
-        exit;
-    }
-    if ($nivelRequerido && $_SESSION['usuario_nivel'] !== $nivelRequerido) {
-        header("Location: index.php?p=home&erro=permissao");
-        exit;
-    }
-}
-
-function calcularTotalCarrinho() {
-    $total = 0;
-    if (isset($_SESSION['carrinho'])) {
-        foreach ($_SESSION['carrinho'] as $item) {
-            $total += $item['valorTotal'];
-        }
-    }
-    return $total;
-}
+// ─── PAGAMENTO ────────────────────────────────────────────────────────────────
 
 function finalizarPagamento($metodoPagamento) {
     if (!isset($_SESSION['pedidos_realizados'])) {
@@ -232,4 +194,43 @@ function finalizarPagamento($metodoPagamento) {
     limparOrcamento();
     return $pedido['id_pedido'];
 }
-?>
+
+function calcularTotalCarrinho() {
+    $total = 0;
+    if (isset($_SESSION['carrinho'])) {
+        foreach ($_SESSION['carrinho'] as $item) {
+            $total += $item['valorTotal'];
+        }
+    }
+    return $total;
+}
+
+// ─── CLIENTES (sessão — legado) ───────────────────────────────────────────────
+
+function cadastrarCliente($nome, $email, $senha) {
+    if (empty($nome) || empty($email) || empty($senha)) return false;
+    if (!isset($_SESSION['clientes'])) $_SESSION['clientes'] = [];
+    foreach ($_SESSION['clientes'] as $c) {
+        if ($c['email'] === $email) return false;
+    }
+    $id = gerarId($_SESSION['clientes']);
+    $_SESSION['clientes'][] = ['id' => $id, 'nome' => $nome, 'email' => $email, 'senha' => $senha, 'nivel' => 'cliente'];
+    return true;
+}
+
+function listarClientes() {
+    return $_SESSION['clientes'] ?? [];
+}
+
+// ─── ACESSO ───────────────────────────────────────────────────────────────────
+
+function verificarAcesso($nivelRequerido = null) {
+    if (!isset($_SESSION['usuario_id'])) {
+        header("Location: index.php?p=login&erro=restrito");
+        exit;
+    }
+    if ($nivelRequerido && $_SESSION['usuario_nivel'] !== $nivelRequerido) {
+        header("Location: index.php?p=home&erro=permissao");
+        exit;
+    }
+}
