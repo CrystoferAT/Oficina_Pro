@@ -3,7 +3,7 @@
     
     $servicos = listarServicos();
 ?>
-    <?php if (isset($_GET['status']) && $_GET['status'] === 'sucesso'): ?>
+<?php if (isset($_GET['status']) && $_GET['status'] === 'sucesso'): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle me-2"></i> Serviço adicionado ao orçamento!
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -18,7 +18,6 @@
         </a>
     </div>
 
-
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -26,31 +25,32 @@
                     <thead class="table-dark">
                         <tr>
                             <th class="ps-4">Serviço / Descrição</th>
+                            <th>Tempo Estimado</th>
                             <th>Mão de Obra</th>
-                            <th>Peças</th>
-                            <th>Total</th>
                             <th class="text-center">Ação</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($servicos)): ?>
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="4" class="text-center py-5 text-muted">
                                     Nenhum serviço cadastrado no sistema.
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($servicos as $indice => $item): ?>
+                            <?php foreach ($servicos as $item): ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="fw-bold text-dark"><?= $item['servico'] ?></span><br>
-                                        <small class="text-muted"><?= $item['pecas'] ?></small>
+                                        <span class="fw-bold text-dark"><?= htmlspecialchars($item['servico']) ?></span>
                                     </td>
-                                    <td><?= formatarMoeda($item['precoServico']) ?></td>
-                                    <td><?= formatarMoeda($item['precoPeca']) ?></td>
-                                    <td class="fw-bold text-primary"><?= formatarMoeda($item['valorTotal']) ?></td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border px-2 py-1.5">
+                                            <i class="bi bi-clock me-1 text-muted"></i><?= $item['tempo'] ?> min
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold text-primary"><?= formatarMoeda($item['precoServico']) ?></td>
                                     <td class="text-center">
-                                        <a href="index.php?p=Carrinho&acao=add&id=<?= $indice ?>" 
+                                        <a href="index.php?p=Carrinho&acao=add&id=<?= $item['id'] ?>" 
                                            class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">
                                             <i class="bi bi-plus-lg me-1"></i> Adicionar
                                         </a>

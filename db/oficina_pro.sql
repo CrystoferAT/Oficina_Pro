@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: May 27, 2026 at 02:43 PM
+-- Generation Time: Jun 03, 2026 at 05:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,44 +24,15 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `carrinho`
---
-
-CREATE TABLE `carrinho` (
-  `id` int(11) NOT NULL,
-  `usuario_id` int(11) NOT NULL,
-  `servico_id` int(11) NOT NULL,
-  `quantidade` int(11) DEFAULT 1,
-  `adicionado_em` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pagamentos`
---
-
-CREATE TABLE `pagamentos` (
-  `id` int(11) NOT NULL,
-  `pedido_id` int(11) NOT NULL,
-  `metodo` varchar(50) NOT NULL, -- PIX, Cartão de Crédito, Dinheiro
-  `valor_pago` decimal(10,2) NOT NULL,
-  `status_pagamento` enum('aprovado','pendente','recusado') DEFAULT 'aprovado',
-  `data_pagamento` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `pedidos`
 --
 
 CREATE TABLE `pedidos` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
-  `total` decimal(10,2) DEFAULT NULL,
+  `total` decimal(10,2) NOT NULL DEFAULT 0.00,
   `status` enum('pendente','aprovado','cancelado') DEFAULT 'pendente',
-  `metodo_pagamento` varchar(50) DEFAULT NULL,
+  `forma_pagamento` varchar(50) DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -76,7 +47,10 @@ CREATE TABLE `pedido_itens` (
   `pedido_id` int(11) NOT NULL,
   `servico_id` int(11) NOT NULL,
   `quantidade` int(11) DEFAULT 1,
-  `preco_unitario` decimal(10,2) DEFAULT NULL
+  `valor_mao_de_obra` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `descricao_pecas` text DEFAULT NULL,
+  `valor_pecas` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `valor_total_item` decimal(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -89,8 +63,10 @@ CREATE TABLE `servicos` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
   `descricao` text DEFAULT NULL,
-  `preco` decimal(10,2) NOT NULL,
-  `ativo` tinyint(1) DEFAULT 1
+  `mao_de_obra` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `tempo_estimado_minutos` int(11) NOT NULL DEFAULT 0,
+  `ativo` tinyint(1) DEFAULT 1,
+  `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -109,23 +85,15 @@ CREATE TABLE `usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Dumping data for table `usuarios`
+--
+
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `nivel`, `criado_em`) VALUES
+(1, 'admin', 'admin@email.com', '123', 'admin', '2026-06-03 15:44:29');
+
+--
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `carrinho`
---
-ALTER TABLE `carrinho`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `usuario_id` (`usuario_id`),
-  ADD KEY `servico_id` (`servico_id`);
-
---
--- Indexes for table `pagamentos`
---
-ALTER TABLE `pagamentos`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `pedido_id` (`pedido_id`);
 
 --
 -- Indexes for table `pedidos`
@@ -160,18 +128,6 @@ ALTER TABLE `usuarios`
 --
 
 --
--- AUTO_INCREMENT for table `carrinho`
---
-ALTER TABLE `carrinho`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `pagamentos`
---
-ALTER TABLE `pagamentos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `pedidos`
 --
 ALTER TABLE `pedidos`
@@ -193,24 +149,11 @@ ALTER TABLE `servicos`
 -- AUTO_INCREMENT for table `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `carrinho`
---
-ALTER TABLE `carrinho`
-  ADD CONSTRAINT `carrinho_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`),
-  ADD CONSTRAINT `carrinho_ibfk_2` FOREIGN KEY (`servico_id`) REFERENCES `servicos` (`id`);
-
---
--- Constraints for table `pagamentos`
---
-ALTER TABLE `pagamentos`
-  ADD CONSTRAINT `pagamentos_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`);
 
 --
 -- Constraints for table `pedidos`
@@ -222,7 +165,7 @@ ALTER TABLE `pedidos`
 -- Constraints for table `pedido_itens`
 --
 ALTER TABLE `pedido_itens`
-  ADD CONSTRAINT `pedido_itens_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`),
+  ADD CONSTRAINT `pedido_itens_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pedido_itens_ibfk_2` FOREIGN KEY (`servico_id`) REFERENCES `servicos` (`id`);
 COMMIT;
 

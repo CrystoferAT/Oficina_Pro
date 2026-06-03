@@ -1,19 +1,19 @@
 <?php
-  $pagina = isset($_GET['p']) ? $_GET['p'] : 'Carrinho'; 
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'Carrinho'; 
 
 if (isset($_GET['acao'])) {
     $acao = $_GET['acao'];
+    $id = isset($_GET['id']) ? (int)$_GET['id'] : null;
     
-    if ($acao === 'add' && isset($_GET['id'])) {
-        adicionarAoOrcamento($_GET['id']);
+    if ($acao === 'add' && $id !== null) {
+        adicionarAoOrcamento($id);
     } 
-    elseif ($acao === 'remover' && isset($_GET['id'])) {
-        removerDoOrcamento($_GET['id']);
+    elseif ($acao === 'remover' && $id !== null) {
+        removerDoOrcamento($id);
     } 
     elseif ($acao === 'limpar') {
         limparOrcamento();
     }
-    
     
     header("Location: index.php?p=Carrinho");
     exit;
@@ -22,12 +22,6 @@ if (isset($_GET['acao'])) {
 $itensNoOrcamento = listarItensOrcamento();
 $totalGeral = calcularTotalOrcamento();
 ?>
-<?php if (isset($_GET['status']) && $_GET['status'] === 'sucesso'): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="bi bi-check-circle me-2"></i> Serviço adicionado ao orçamento!
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-<?php endif; ?>
 
 <div class="container py-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
@@ -35,7 +29,7 @@ $totalGeral = calcularTotalOrcamento();
             <i class="bi bi-cart3 text-primary me-2"></i>Seu Orçamento
         </h2>
         <div>
-            <a href="index.php?p=Orcamento" class="btn btn-outline-primary btn-sm">
+            <a href="index.php?p=Orcamento" class="btn btn-outline-primary btn-sm me-2">
                 <i class="bi bi-arrow-left"></i> Adicionar mais serviços
             </a>
             <?php if (!empty($itensNoOrcamento)): ?>
@@ -51,19 +45,17 @@ $totalGeral = calcularTotalOrcamento();
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                    <thead class="table-dark">
                         <tr>
                             <th class="ps-4">Serviço</th>
-                            <th>Mão de Obra</th>
-                            <th>Peças</th>
-                            <th>Subtotal</th>
+                            <th class="text-end pe-5">Valor da Mão de Obra</th>
                             <th class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($itensNoOrcamento)): ?>
                             <tr>
-                                <td colspan="5" class="text-center py-5">
+                                <td colspan="3" class="text-center py-5">
                                     <div class="text-muted">
                                         <i class="bi bi-cart-x fs-1"></i>
                                         <p class="mt-2">Seu orçamento está vazio no momento.</p>
@@ -71,20 +63,19 @@ $totalGeral = calcularTotalOrcamento();
                                 </td>
                             </tr>
                         <?php else: ?>
-                            <?php foreach ($itensNoOrcamento as $indice => $item): ?>
+                            <?php foreach ($itensNoOrcamento as $idServico => $item): ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <div class="fw-bold"><?= $item['servico'] ?></div>
-                                        <small class="text-muted"><?= $item['pecas'] ?></small>
+                                        <div class="fw-bold text-dark"><?= htmlspecialchars($item['servico']) ?></div>
                                     </td>
-                                    <td><?= formatarMoeda($item['precoServico']) ?></td>
-                                    <td><?= formatarMoeda($item['precoPeca']) ?></td>
-                                    <td class="fw-bold text-primary"><?= formatarMoeda($item['valorTotal']) ?></td>
+                                    <td class="text-end pe-5 fw-bold text-primary">
+                                        <?= formatarMoeda($item['precoServico']) ?>
+                                    </td>
                                     <td class="text-center">
-                                        <a href="index.php?p=Carrinho&acao=remover&id=<?= $indice ?>" 
+                                        <a href="index.php?p=Carrinho&acao=remover&id=<?= $idServico ?>" 
                                            class="btn btn-sm btn-outline-danger" 
                                            title="Remover este item">
-                                            <i class="bi bi-x-circle"></i> Retirar
+                                            <i class="bi bi-x-circle me-1"></i> Retirar
                                         </a>
                                     </td>
                                 </tr>
@@ -94,12 +85,13 @@ $totalGeral = calcularTotalOrcamento();
                     <?php if (!empty($itensNoOrcamento)): ?>
                         <tfoot class="table-group-divider">
                             <tr class="table-light">
-                                <td colspan="3" class="text-end fw-bold py-3 fs-5">Valor Total do Orçamento:</td>
-                                <td colspan="2" class="fw-bold text-primary py-3 fs-4">
+                                <td class="text-end fw-bold py-3 fs-5">Valor Total do Orçamento:</td>
+                                <td class="text-end pe-5 fw-bold text-success py-3 fs-4">
                                     <?= formatarMoeda($totalGeral) ?>
                                 </td>
+                                <td></td>
                             </tr>
-                        </tfoot>
+                        </footer>
                     <?php endif; ?>
                 </table>
             </div>
@@ -107,9 +99,9 @@ $totalGeral = calcularTotalOrcamento();
     </div>
 
     <?php if (!empty($itensNoOrcamento)): ?>
-        <div class="mt-4 d-flex justify-content-end">
-            <button class="btn btn-success btn-lg px-5 shadow fw-bold" onclick="window.print()">
-                <i class="bi bi-printer me-2"></i>Imprimir Orçamento
+        <div class="mt-4 d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-secondary btn-lg px-4 shadow-sm fw-bold" onclick="window.print()">
+                <i class="bi bi-printer me-2"></i>Imprimir
             </button>
 
             <a href="index.php?p=pagamento" class="btn btn-success btn-lg px-5 shadow fw-bold">

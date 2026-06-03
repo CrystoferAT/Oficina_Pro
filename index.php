@@ -44,48 +44,44 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="menuPrincipal">
-                <ul class="navbar-nav ms-auto">
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
                             <a class="nav-link <?= $pagina == 'home' ? 'active' : '' ?>" href="index.php?p=home">Home</a>
                         </li>
 
                         <?php if (isset($_SESSION['autenticado']) && $_SESSION['autenticado'] === true): ?>
-                        <?php if ($_SESSION['usuario_nivel'] === 'admin' || $_SESSION['usuario_nivel'] !== 'cliente'): ?>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'cadastro_usuarios' ? 'active' : '' ?>" href="index.php?p=cadastro_usuarios">Funcionários</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'cadastro_servicos' ? 'active' : '' ?>" href="index.php?p=cadastro_servicos">Novos Serviços</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'servicos' ? 'active' : '' ?>" href="index.php?p=servicos">Listagem</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'dash' ? 'active' : '' ?>" href="index.php?p=dash">DashBoard</a>
-                            </li>
-                            <li class="nav-item ms-lg-2">
-                                    <li class="nav-item"><a class="nav-link text-danger"  href="logout.php">Sair</a></li>
-                            </li>
                             
-                    
-                        <?php endif; ?>
-                            
-                        <?php if ($_SESSION['usuario_nivel'] === 'cliente'): ?>
-                            
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'Orcamento' ? 'active' : '' ?>" href="index.php?p=Orcamento">Orçamento</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link <?= $pagina == 'Carrinho' ? 'active' : '' ?>" href="index.php?p=Carrinho">Carrinho</a>
-                            </li>
-                        
-                            <li class="nav-item ms-lg-2">
-                                <a class="btn btn-outline-light btn-sm mt-1" href="logout.php">
-                                    Sair
-                                </a>
-                            </li>
-                        
-                        <?php endif; ?>
+                            <?php if ($_SESSION['usuario_nivel'] === 'admin' || $_SESSION['usuario_nivel'] === 'funcionario'): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'cadastro_usuarios' ? 'active' : '' ?>" href="index.php?p=cadastro_usuarios">Funcionários</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'cadastro_servicos' ? 'active' : '' ?>" href="index.php?p=cadastro_servicos">Novos Serviços</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'servicos' ? 'active' : '' ?>" href="index.php?p=servicos">Listagem</a>
+                                </li>
+                                
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'dash' ? 'active' : '' ?>" href="index.php?p=dash">DashBoard</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-danger" href="logout.php">Sair</a>
+                                </li>
+                            <?php endif; ?>
+                                
+                            <?php if ($_SESSION['usuario_nivel'] === 'cliente'): ?>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'Orcamento' ? 'active' : '' ?>" href="index.php?p=Orcamento">Orçamento</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link <?= $pagina == 'Carrinho' ? 'active' : '' ?>" href="index.php?p=Carrinho">Carrinho</a>
+                                </li>
+                                <li class="nav-item ms-lg-2">
+                                    <a class="btn btn-outline-light btn-sm mt-1" href="logout.php">Sair</a>
+                                </li>
+                            <?php endif; ?>
 
                         <?php else: ?>
                             <li class="nav-item">
@@ -106,7 +102,6 @@
                 <?php
                 switch ($pagina) {
                     case 'home':
-
                         $botoes = "";
                         if (!isset($_SESSION['autenticado'])) {
                             $botoes = "
@@ -126,20 +121,25 @@
                         </div>";
                         break;
                     case 'cadastro_usuarios':
-                        verificarAcesso('admin');
+                        // Mantido para controle de funcionários
+                        verificarAcesso('funcionario');
                         include 'view/cadastroUsuarios.php';
                         break;
                     case 'cadastro':
                         include 'view/cadastro_usuario.php';
                         break;
                     case 'cadastro_servicos':
-                        verificarAcesso('admin');
+                        verificarAcesso('funcionario');
                         include 'view/cadastroServicos.php';
                         break;
                     case 'login':
                         include 'view/login.php';
                         break;
                     case 'servicos':
+                        if ($_SESSION['usuario_nivel'] !== 'admin' && $_SESSION['usuario_nivel'] !== 'funcionario') {
+                            header("Location: index.php?p=home&erro=permissao");
+                            exit;
+                        }
                         include 'view/servicosCadastrados.php';
                         break;
                     case 'Orcamento':
@@ -149,7 +149,8 @@
                         include 'view/carrinho.php';
                         break;
                     case 'dash':
-                        verificarAcesso('admin');
+                        // CORRIGIDO: Permite que funcionários também acessem a tela da Dashboard
+                        verificarAcesso('funcionario');
                         include 'view/dashboard.php';
                         break;
                     case 'pagamento':

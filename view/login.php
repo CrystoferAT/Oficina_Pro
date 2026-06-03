@@ -1,10 +1,11 @@
 <?php
-    
     $pergunta = gerarCaptcha();
 
     $erro_tipo = $_GET['erro'] ?? '';
-    $erro_msg = "";
+    $status    = $_GET['status'] ?? '';
+    $erro_msg  = "";
 
+    // Mapeia os tipos de erros vindos do LoginController
     if ($erro_tipo === 'captcha') {
         $erro_msg = "Soma do CAPTCHA incorreta!";
     } elseif ($erro_tipo === 'dados') {
@@ -22,6 +23,12 @@
                 </div>
                 <div class="card-body p-4">
                     
+                    <?php if ($status === 'sucesso'): ?>
+                        <div class="alert alert-success py-2 small text-center fw-bold" role="alert">
+                            <i class="bi bi-check-circle-fill me-2"></i> Cadastro realizado com sucesso!
+                        </div>
+                    <?php endif; ?>
+
                     <?php if ($erro_msg): ?>
                         <div class="alert alert-danger py-2 small text-center" role="alert">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i> <?= $erro_msg ?>

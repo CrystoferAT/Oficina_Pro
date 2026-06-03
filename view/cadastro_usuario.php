@@ -1,19 +1,24 @@
 <?php
-  $pagina = isset($_GET['p']) ? $_GET['p'] : 'cadastro';
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'cadastro';
 $erro = "";
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nome  = $_POST['nome'];
-    $email = $_POST['email'];
-    $senha = $_POST['senha'];
+    $nome  = trim($_POST['nome'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $senha = $_POST['senha'] ?? '';
 
-    if (cadastrarCliente($nome, $email, $senha)) {
-    echo "<script>
-            alert('Cadastro realizado com sucesso!');
-            window.location.href='index.php?p=login';
-          </script>";
-    exit;
-}else {
+    $dadosUsuario = [
+        'nome'  => $nome,
+        'email' => $email,
+        'senha' => $senha,
+        'nivel' => 'cliente'
+    ];
+
+    if (cadastrarUsuario($dadosUsuario)) {
+        // Redireciona para o login passando o status de sucesso na URL
+        header("Location: index.php?p=login&status=sucesso");
+        exit;
+    } else {
         $erro = "Erro: Este e-mail já está cadastrado ou houve um problema no servidor!";
     }
 }
