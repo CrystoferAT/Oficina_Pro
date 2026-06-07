@@ -85,16 +85,16 @@
                                 <?php else: foreach($servicos as $s): ?>
                                 <tr>
                                     <td class="ps-3">
-                                        <strong class="text-dark small"><?= htmlspecialchars($s['servico']) ?></strong>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Cód: #<?= str_pad($s['id'], 4, '0', STR_PAD_LEFT) ?></div>
+                                        <strong class="text-dark small"><?= htmlspecialchars($s['nome'] ?? '') ?></strong>
+                                        <div class="text-muted" style="font-size: 0.75rem;">Cód: #<?= str_pad($s['id'] ?? 0, 4, '0', STR_PAD_LEFT) ?></div>
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border fw-normal">
-                                            <?= $s['tempo'] > 0 ? $s['tempo'] . " min" : "Não inf." ?>
+                                            <?= (isset($s['tempo_estimado_minutos']) && $s['tempo_estimado_minutos'] > 0) ? $s['tempo_estimado_minutos'] . " min" : "Não inf." ?>
                                         </span>
                                     </td>
                                     <td class="text-end fw-bold text-success pe-3">
-                                        <?= formatarMoeda($s['precoServico']) ?>
+                                        <?= formatarMoeda($s['mao_de_obra'] ?? 0) ?>
                                     </td>
                                 </tr>
                                 <?php endforeach; endif; ?>

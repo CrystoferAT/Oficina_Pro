@@ -66,10 +66,10 @@ $totalGeral = calcularTotalOrcamento();
                             <?php foreach ($itensNoOrcamento as $idServico => $item): ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <div class="fw-bold text-dark"><?= htmlspecialchars($item['servico']) ?></div>
+                                        <div class="fw-bold text-dark"><?= htmlspecialchars($item['nome']) ?></div>
                                     </td>
                                     <td class="text-end pe-5 fw-bold text-primary">
-                                        <?= formatarMoeda($item['precoServico']) ?>
+                                        <?= formatarMoeda($item['mao_de_obra']) ?>
                                     </td>
                                     <td class="text-center">
                                         <a href="index.php?p=Carrinho&acao=remover&id=<?= $idServico ?>" 

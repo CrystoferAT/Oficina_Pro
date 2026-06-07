@@ -1,13 +1,9 @@
 <?php
-// Garante acesso apenas para a equipe da oficina
-verificarAcesso('funcionario');
-
-// Puxa as listagens que você já usa
 $listaServicos = listarServicos();
 $listaUsuarios = listarUsuarios(); 
 $listaClientes = listarClientes(); 
 
-// Puxa os dados de métricas e ordens de serviço que criamos no model
+// Puxa os dados de métricas e ordens de serviço do model
 $metricas = obterMetricasDashboard();
 $ultimosPedidos = listarUltimosPedidos(5);
 ?>
@@ -16,11 +12,8 @@ $ultimosPedidos = listarUltimosPedidos(5);
     <div class="col-12 text-center text-lg-start d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 me-2 text-primary"></i>Painel de Controle</h2>
-            <p class="text-muted mb-0">Resumo geral e monitoramento das atividades da oficina.</p>
+            <p class="text-muted mb-0">Resumo geral e monitoring das atividades da oficina.</p>
         </div>
-        <button class="btn btn-primary fw-bold shadow-sm" onclick="simularNovoOrcamento()">
-            <i class="bi bi-plus-lg me-1"></i> Simular Novo Orçamento
-        </button>
     </div>
 </div>
 
@@ -140,7 +133,9 @@ $ultimosPedidos = listarUltimosPedidos(5);
                         <tbody>
                             <?php if(empty($listaUsuarios)): ?>
                                 <tr><td colspan="3" class="text-center py-4 text-muted small">Nenhum funcionário cadastrado.</td></tr>
-                            <?php else: foreach($listaUsuarios as $user): ?>
+                            <?php else: foreach($listaUsuarios as $user):
+                                if ($user['nivel'] === 'cliente') { continue; }
+                                ?>
                                 <tr>
                                     <td class="ps-3 fw-semibold text-dark small"><?= htmlspecialchars($user['nome']) ?></td>
                                     <td><span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle"><?= ucfirst($user['nivel']) ?></span></td>
@@ -169,12 +164,15 @@ $ultimosPedidos = listarUltimosPedidos(5);
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if(empty($listaClientes)): ?>
-                                <tr><td colspan="2" class="text-center py-4 text-muted small">Nenhum cliente cadastrado.</td></tr>
-                            <?php else: foreach($listaClientes as $cli): ?>
+                            <?php if(empty($listaUsuarios)): ?>
+                                <tr><td colspan="3" class="text-center py-4 text-muted small">Nenhum Cliente cadastrado.</td></tr>
+                            <?php else: foreach($listaUsuarios as $user):
+                                if ($user['nivel'] !== 'cliente') { continue; }
+                                ?>
                                 <tr>
-                                    <td class="ps-3 fw-semibold text-dark small"><?= htmlspecialchars($cli['nome']) ?></td>
-                                    <td class="text-muted small"><?= htmlspecialchars($cli['email']) ?></td>
+                                    <td class="ps-3 fw-semibold text-dark small"><?= htmlspecialchars($user['nome']) ?></td>
+                                    <td><span class="badge rounded-pill bg-info-subtle text-info border border-info-subtle"><?= ucfirst($user['nivel']) ?></span></td>
+                                    <td class="text-muted small"><?= htmlspecialchars($user['email']) ?></td>
                                 </tr>
                             <?php endforeach; endif; ?>
                         </tbody>
@@ -198,24 +196,3 @@ $ultimosPedidos = listarUltimosPedidos(5);
         </div>
     </div>
 </div>
-
-<script>
-// Abre o toast dinamicamente via botão de simulação
-function simularNovoOrcamento() {
-    document.getElementById('toastMensagem').innerHTML = "<strong>Orçamento Novo!</strong><br>Troca de Óleo salva no sistema. Status: <span class='badge bg-warning text-dark'>Pendente</span>";
-    var toastElement = document.getElementById('orcamentoToast');
-    var bootstrapToast = new bootstrap.Toast(toastElement);
-    bootstrapToast.show();
-}
-
-// Abre automaticamente o toast caso o controlador redirecione com ?sucesso=orcamento
-document.addEventListener("DOMContentLoaded", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('sucesso') === 'orcamento') {
-        document.getElementById('toastMensagem').innerHTML = "<strong>Sucesso!</strong> O orçamento e os serviços do cliente foram salvos no banco de dados.";
-        var toastElement = document.getElementById('orcamentoToast');
-        var bootstrapToast = new bootstrap.Toast(toastElement);
-        bootstrapToast.show();
-    }
-});
-</script>

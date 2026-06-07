@@ -36,15 +36,15 @@
                     <?php else: foreach($servicos as $s): ?>
                     <tr>
                         <td class="ps-4">
-                            <span class="fw-bold d-block text-dark"><?= htmlspecialchars($s['servico']) ?></span>
-                            <small class="text-muted">Cód: #<?= str_pad($s['id'], 4, '0', STR_PAD_LEFT) ?></small>
+                            <span class="fw-bold d-block text-dark"><?= htmlspecialchars($s['nome']) ?></span>
+                            <small class="text-muted">Cód: #<?= str_pad($s['id'] ?? 0, 4, '0', STR_PAD_LEFT) ?></small>
                         </td>
                         <td>
                             <span class="badge bg-light text-dark border fw-normal">
-                                <i class="bi bi-clock me-1 text-secondary"></i><?= $s['tempo'] > 0 ? $s['tempo'] . ' min' : 'Não informado' ?>
+                                <i class="bi bi-clock me-1 text-secondary"></i><?= (isset($s['tempo_estimado_minutos']) && $s['tempo_estimado_minutos'] > 0) ? $s['tempo_estimado_minutos'] . ' min' : 'Não informado' ?>
                             </span>
                         </td>
-                        <td class="text-end fw-bold text-success"><?= formatarMoeda($s['precoServico']) ?></td>
+                        <td class="text-end fw-bold text-success"><?= formatarMoeda($s['mao_de_obra'] ?? 0) ?></td>
                         <td class="text-center">
                             <div class="btn-group shadow-sm">
                                 <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editModal<?= $s['id'] ?>">
@@ -70,17 +70,17 @@
                                                 
                                                 <div class="mb-3">
                                                     <label class="form-label fw-bold small">Nome do Serviço:</label>
-                                                    <input type="text" name="servico" class="form-control" value="<?= htmlspecialchars($s['servico']) ?>" required>
+                                                    <input type="text" name="servico" class="form-control" value="<?= htmlspecialchars($s['nome']) ?>" required>
                                                 </div>
                                                 
                                                 <div class="row">
                                                     <div class="col-md-6 mb-3">
                                                         <label class="form-label fw-bold small">Tempo Estimado (min):</label>
-                                                        <input type="number" name="tempo" class="form-control" value="<?= $s['tempo'] ?>">
+                                                        <input type="number" name="tempo" class="form-control" value="<?= $s['tempo_estimado_minutos'] ?>">
                                                     </div>
                                                     <div class="col-md-6 mb-3">
                                                         <label class="form-label fw-bold small">Mão de Obra (R$):</label>
-                                                        <input type="number" step="0.01" name="precoServico" class="form-control" value="<?= $s['precoServico'] ?>" required>
+                                                        <input type="number" step="0.01" name="precoServico" class="form-control" value="<?= $s['mao_de_obra'] ?>" required>
                                                     </div>
                                                 </div>
                                             </div>
@@ -165,10 +165,10 @@
                                 <?php else: foreach(array_slice($servicos, 0, 5) as $s): ?>
                                 <tr>
                                     <td class="ps-3">
-                                        <strong class="text-dark small d-block"><?= htmlspecialchars($s['servico']) ?></strong>
-                                        <small class="text-muted text-xs">Tempo: <?= $s['tempo'] ?> min</small>
+                                        <strong class="text-dark small d-block"><?= htmlspecialchars($s['nome']) ?></strong>
+                                        <small class="text-muted text-xs">Tempo: <?= $s['tempo_estimado_minutos'] ?> min</small>
                                     </td>
-                                    <td class="text-end fw-bold text-dark small"><?= formatarMoeda($s['precoServico']) ?></td>
+                                    <td class="text-end fw-bold text-dark small"><?= formatarMoeda($s['mao_de_obra'] ?? 0) ?></td>
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-outline-primary py-0 px-2" data-bs-toggle="modal" data-bs-target="#editModal<?= $s['id'] ?>">
                                             <i class="bi bi-pencil small"></i>
