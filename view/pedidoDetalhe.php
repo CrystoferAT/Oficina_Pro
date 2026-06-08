@@ -5,6 +5,7 @@ $pedidoId = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 $pedido = obterPedidoPorId($pedidoId);
 $itensPedido = $pedido ? listarItensPedido($pedidoId) : [];
 $cookiePedido = isset($_COOKIE['ultimo_pedido']) ? htmlspecialchars($_COOKIE['ultimo_pedido']) : '';
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'pedido';
 
 if (!$pedido) {
     echo "<div class='alert alert-warning shadow-sm border-0'>Pedido não encontrado ou não existe.</div>";

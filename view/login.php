@@ -1,6 +1,7 @@
 <?php
     $pergunta = gerarCaptcha();
 
+    $pagina = isset($_GET['p']) ? $_GET['p'] : 'login';
     $erro_tipo = $_GET['erro'] ?? '';
     $status    = $_GET['status'] ?? '';
     $erro_msg  = "";
@@ -51,6 +52,10 @@
                                 <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
                                 <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
                             </div>
+                        </div>
+                        <div>
+                            <input type="checkbox" name="lembrar" id="lembrar" value="1">
+                            <label for="lembrar">Lembrar-me por 30 dias</label>
                         </div>
 
                         <div class="card bg-light border-0 mb-4">

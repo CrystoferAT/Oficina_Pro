@@ -1,5 +1,6 @@
 <?php
     $totalCarrinho = calcularTotalOrcamento();
+    $pagina = isset($_GET['p']) ? $_GET['p'] : 'pagamento';
 ?>
 
 <div class="container py-4">

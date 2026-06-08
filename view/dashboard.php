@@ -5,6 +5,7 @@ $listaClientes = listarClientes();
 
 $metricas = obterMetricasDashboard();
 $ultimosPedidos = listarUltimosPedidos(5);
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'dash';
 ?>
 
 <div class="row mb-4">

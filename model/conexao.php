@@ -4,7 +4,7 @@ function getConexao() {
 
 
     if ($banco === null) {
-        $banco = new mysqli("localhost", "root", "", "oficina_pro", 3306);
+        $banco = new mysqli("localhost", "root", "", "oficina_pro", 3307);
 
         if ($banco->connect_error) {
             die("Erro na conexão: " . $banco->connect_error);

@@ -9,26 +9,119 @@ if (!isset($banco) || $banco === null) {
     getConexao(); 
 }
 
-function validarLogin($email, $pass) {
+function validarLogin($email, $pass, $lembrar = false) {
     global $banco;
 
-    $stmt = $banco->prepare("SELECT id, nome, nivel, senha FROM usuarios WHERE email = ?");
+    $stmt = $banco->prepare(
+        "SELECT id, nome, nivel, senha FROM usuarios WHERE email = ?"
+    );
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $resultado = $stmt->get_result();
 
     if ($resultado->num_rows === 1) {
         $usuario = $resultado->fetch_assoc();
-        $senhaValida = password_verify($pass, $usuario['senha']) || $pass === $usuario['senha'];
+        $senhaValida = password_verify($pass, $usuario['senha'])
+                    || $pass === $usuario['senha'];
+
         if ($senhaValida) {
-            $_SESSION['usuario_id']    = $usuario['id'];
-            $_SESSION['usuario_nome']  = $usuario['nome'];
-            $_SESSION['usuario_nivel'] = $usuario['nivel'];
-            $_SESSION['autenticado']   = true;
+            _iniciarSessaoUsuario($usuario);
+
+            if ($lembrar) {
+                _criarTokenLembrar($usuario['id']);
+            }
             return true;
         }
     }
     return false;
+}
+
+// Preenche $_SESSION com os dados do usuário
+function _iniciarSessaoUsuario(array $usuario) {
+    $_SESSION['usuario_id']    = $usuario['id'];
+    $_SESSION['usuario_nome']  = $usuario['nome'];
+    $_SESSION['usuario_nivel'] = $usuario['nivel'];
+    $_SESSION['autenticado']   = true;
+}
+
+// Gera token, salva no banco e define o cookie (30 dias)
+function _criarTokenLembrar($usuarioId) {
+    global $banco;
+
+    $token    = bin2hex(random_bytes(32));          // 64 chars hex
+    $expira   = date('Y-m-d H:i:s', strtotime('+30 days'));
+    $duration = 30 * 24 * 60 * 60;
+
+    // Remove tokens antigos deste usuário (limpeza)
+    $stmt = $banco->prepare("DELETE FROM remember_tokens WHERE usuario_id = ?");
+    $stmt->bind_param("i", $usuarioId);
+    $stmt->execute();
+
+    // Insere novo token
+    $stmt = $banco->prepare(
+        "INSERT INTO remember_tokens (usuario_id, token, expira_em) VALUES (?, ?, ?)"
+    );
+    $stmt->bind_param("iss", $usuarioId, $token, $expira);
+    $stmt->execute();
+
+    // Define cookie seguro
+    setcookie('remember_token', $token, [
+        'expires'  => time() + $duration,
+        'path'     => '/',
+        'httponly' => true,      // não acessível via JS
+        'samesite' => 'Strict',
+    ]);
+}
+
+// Tenta autenticar pelo cookie; retorna true se conseguiu
+function verificarCookieLembrar() {
+    global $banco;
+
+    if (isset($_SESSION['autenticado'])) return true;   // já logado
+    if (empty($_COOKIE['remember_token'])) return false;
+
+    $token = $_COOKIE['remember_token'];
+
+    $stmt = $banco->prepare(
+        "SELECT rt.usuario_id, u.nome, u.nivel
+         FROM remember_tokens rt
+         JOIN usuarios u ON u.id = rt.usuario_id
+         WHERE rt.token = ? AND rt.expira_em > NOW()"
+    );
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+
+    if ($resultado->num_rows === 1) {
+        $usuario = $resultado->fetch_assoc();
+        _iniciarSessaoUsuario([
+            'id'    => $usuario['usuario_id'],
+            'nome'  => $usuario['nome'],
+            'nivel' => $usuario['nivel'],
+        ]);
+        // Renova o token a cada uso (rotação)
+        _criarTokenLembrar($usuario['usuario_id']);
+        return true;
+    }
+
+    // Token inválido/expirado → limpa cookie
+    setcookie('remember_token', '', time() - 3600, '/');
+    return false;
+}
+
+// Chame no logout
+function fazerLogout() {
+    global $banco;
+
+    if (!empty($_COOKIE['remember_token'])) {
+        $token = $_COOKIE['remember_token'];
+        $stmt  = $banco->prepare("DELETE FROM remember_tokens WHERE token = ?");
+        $stmt->bind_param("s", $token);
+        $stmt->execute();
+        setcookie('remember_token', '', time() - 3600, '/');
+    }
+
+    session_destroy();
 }
 
 function gerarId($array) {
@@ -53,12 +146,6 @@ function salvarServico($dados){
     return $stmt->execute();
 }
 
-function listarServicos(){
-    global $banco;
-    $resultado = $banco->query("SELECT id, nome, tempo_estimado_minutos, mao_de_obra, ativo FROM servicos ORDER BY id DESC");
-    return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
-}
-
 function editarServicos($id, $novosDados){
     global $banco;
     
@@ -73,7 +160,8 @@ function editarServicos($id, $novosDados){
 
 function excluirServicos($id){
     global $banco;
-    $stmt = $banco->prepare("DELETE FROM servicos WHERE id = ?");
+    // Soft delete: oculta o serviço sem quebrar o histórico de pedidos
+    $stmt = $banco->prepare("UPDATE servicos SET ativo = 0 WHERE id = ?");
     $stmt->bind_param("i", $id);
     return $stmt->execute();
 }
@@ -100,7 +188,7 @@ function cadastrarUsuario($dadosUsuario) {
 
 function listarUsuarios() {
     global $banco;
-    $resultado = $banco->query("SELECT id, nome, email, nivel FROM usuarios ORDER BY id ASC");
+    $resultado = $banco->query("SELECT id, nome, email, nivel FROM usuarios WHERE ativo = 1 ORDER BY id ASC");
     return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
 }
 
@@ -131,7 +219,7 @@ function editarUsuario($id, $dadosUsuario) {
 
 function excluirUsuario($id) {
     global $banco;
-    $stmt = $banco->prepare("DELETE FROM usuarios WHERE id=?");
+    $stmt = $banco->prepare("UPDATE usuarios SET ativo = 0 WHERE id = ?");
     $stmt->bind_param("i", $id);
     return $stmt->execute();
 }
@@ -385,4 +473,11 @@ function listarItensPedido($pedidoId) {
     $resultado = $stmt->get_result();
 
     return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
-}?>b4ca6c11cb3f25815ed079d991ca23de5cff6a
+
+}
+function listarServicos() {
+global $banco;
+$resultado = $banco->query("SELECT id, nome, tempo_estimado_minutos, mao_de_obra FROM servicos WHERE ativo = 1 ORDER BY id ASC");
+return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
+}
+?>

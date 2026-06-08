@@ -15,9 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cadastrar'])) {
     $resultado = cadastrarUsuario($dadosUsuario);
 
     if ($resultado) {
-        header("Location: ../index.php?p=cadastro_usuarios&sucesso=cadastro");
+        header("Location: ../index.php?p=cadastroUsuario&sucesso=cadastro");
     } else {
-        header("Location: ../index.php?p=cadastro_usuarios&erro=email_duplicado");
+        header("Location: ../index.php?p=cadastroUsuario&erro=email_duplicado");
     }
     exit;
 }
@@ -34,9 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editar'])) {
     $resultado = editarUsuario($id, $dadosUsuario);
 
     if ($resultado) {
-        header("Location: ../index.php?p=cadastro_usuarios&sucesso=edicao");
+        header("Location: ../index.php?p=cadastroUsuario&sucesso=edicao");
     } else {
-        header("Location: ../index.php?p=cadastro_usuarios&erro=edicao");
+        header("Location: ../index.php?p=cadastroUsuario&erro=edicao");
     }
     exit;
 }
@@ -47,9 +47,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['excluir'])) {
     $resultado = excluirUsuario($id);
 
     if ($resultado) {
-        header("Location: ../index.php?p=cadastro_usuarios&sucesso=exclusao");
+        header("Location: ../index.php?p=cadastroUsuario&sucesso=exclusao");
     } else {
-        header("Location: ../index.php?p=cadastro_usuarios&erro=exclusao");
+        header("Location: ../index.php?p=cadastroUsuario&erro=exclusao");
     }
     exit;
 }

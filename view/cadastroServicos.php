@@ -1,3 +1,7 @@
+<?php
+require_once "model/funcoes.php";
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'servicos_servicos';
+?>
 <div class="container mt-4">
     <div class="row">
         <div class="col-12">

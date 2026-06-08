@@ -51,7 +51,7 @@ $pagina = isset($_GET['p']) ? $_GET['p'] : 'home';
                             
                             <?php if ($_SESSION['usuario_nivel'] === 'admin' || $_SESSION['usuario_nivel'] === 'funcionario'): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link <?= $pagina == 'cadastro_usuarios' ? 'active' : '' ?>" href="index.php?p=cadastro_usuarios">Usuários</a>
+                                    <a class="nav-link <?= $pagina == 'cadastroUsuario' ? 'active' : '' ?>" href="index.php?p=cadastroUsuario">Usuários</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $pagina == 'cadastro_servicos' ? 'active' : '' ?>" href="index.php?p=cadastro_servicos">Novos Serviços</a>
@@ -115,7 +115,7 @@ $pagina = isset($_GET['p']) ? $_GET['p'] : 'home';
                             </div>
                         </div>";
                         break;
-                    case 'cadastro_usuarios':
+                    case 'cadastroUsuario':
                         include 'view/cadastroUsuarios.php';
                         break;
                     case 'cadastro':

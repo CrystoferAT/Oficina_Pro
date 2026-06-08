@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $email           = trim($_POST['email'] ?? '');
         $senha           = $_POST['senha'] ?? '';
         $captcha_usuario = $_POST['captcha'] ?? '';
+        $lembrar         = isset($_POST['lembrar']) && $_POST['lembrar'] === '1';
 
         // Valida captcha
         if ((int)$captcha_usuario !== (int)$_SESSION['captcha_soma']) {
@@ -18,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         unset($_SESSION['captcha_soma']);
 
-        if (validarLogin($email, $senha)) {
+        if (validarLogin($email, $senha, $lembrar)) {
             header("Location: ../index.php?p=home");
         } else {
             header("Location: ../index.php?p=login&erro=dados");

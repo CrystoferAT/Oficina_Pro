@@ -1,3 +1,7 @@
+<?php
+require_once "model/funcoes.php";
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'cadastroUsuario';
+?>
 <div class="container mt-4">
 
     <?php if (isset($_GET['sucesso'])): ?>
