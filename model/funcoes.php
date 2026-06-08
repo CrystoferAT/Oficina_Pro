@@ -385,5 +385,4 @@ function listarItensPedido($pedidoId) {
     $resultado = $stmt->get_result();
 
     return $resultado ? $resultado->fetch_all(MYSQLI_ASSOC) : [];
-}
-?>
+}?>b4ca6c11cb3f25815ed079d991ca23de5cff6a
