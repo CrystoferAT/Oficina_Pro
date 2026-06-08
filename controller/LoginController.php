@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        unset($_SESSION['captcha_soma']); // limpa ANTES do redirect
+        unset($_SESSION['captcha_soma']);
 
         if (validarLogin($email, $senha)) {
             header("Location: ../index.php?p=home");

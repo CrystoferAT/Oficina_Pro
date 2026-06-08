@@ -5,7 +5,6 @@
     $status    = $_GET['status'] ?? '';
     $erro_msg  = "";
 
-    // Mapeia os tipos de erros vindos do LoginController
     if ($erro_tipo === 'captcha') {
         $erro_msg = "Soma do CAPTCHA incorreta!";
     } elseif ($erro_tipo === 'dados') {

@@ -41,14 +41,14 @@
                             <?php foreach ($servicos as $item): ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="fw-bold text-dark"><?= htmlspecialchars($item['servico']) ?></span>
+                                        <span class="fw-bold text-dark"><?= htmlspecialchars($item['nome']) ?></span>
                                     </td>
                                     <td>
                                         <span class="badge bg-light text-dark border px-2 py-1.5">
-                                            <i class="bi bi-clock me-1 text-muted"></i><?= $item['tempo'] ?> min
+                                            <i class="bi bi-clock me-1 text-muted"></i><?= $item['tempo_estimado_minutos'] ?> min
                                         </span>
                                     </td>
-                                    <td class="fw-bold text-primary"><?= formatarMoeda($item['precoServico']) ?></td>
+                                    <td class="fw-bold text-primary"><?= formatarMoeda($item['mao_de_obra']) ?></td>
                                     <td class="text-center">
                                         <a href="index.php?p=Carrinho&acao=add&id=<?= $item['id'] ?>" 
                                            class="btn btn-primary btn-sm px-3 rounded-pill shadow-sm">

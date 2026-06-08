@@ -15,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ];
 
     if (cadastrarUsuario($dadosUsuario)) {
-        // Redireciona para o login passando o status de sucesso na URL
         header("Location: index.php?p=login&status=sucesso");
         exit;
     } else {

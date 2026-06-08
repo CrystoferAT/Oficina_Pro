@@ -1,31 +1,11 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1:3307
--- Generation Time: Jun 03, 2026 at 05:45 PM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+CREATE DATABASE oficina_pro;
+USE oficina_pro;
+
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `oficina_pro`
---
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pedidos`
---
 
 CREATE TABLE `pedidos` (
   `id` int(11) NOT NULL,
@@ -35,12 +15,6 @@ CREATE TABLE `pedidos` (
   `forma_pagamento` varchar(50) DEFAULT NULL,
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `pedido_itens`
---
 
 CREATE TABLE `pedido_itens` (
   `id` int(11) NOT NULL,
@@ -53,12 +27,6 @@ CREATE TABLE `pedido_itens` (
   `valor_total_item` decimal(10,2) NOT NULL DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `servicos`
---
-
 CREATE TABLE `servicos` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -69,12 +37,6 @@ CREATE TABLE `servicos` (
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `usuarios`
---
-
 CREATE TABLE `usuarios` (
   `id` int(11) NOT NULL,
   `nome` varchar(100) NOT NULL,
@@ -84,91 +46,45 @@ CREATE TABLE `usuarios` (
   `criado_em` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data for table `usuarios`
---
 
 INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `nivel`, `criado_em`) VALUES
 (1, 'admin', 'admin@email.com', '123', 'admin', '2026-06-03 15:44:29');
 
---
--- Indexes for dumped tables
---
 
---
--- Indexes for table `pedidos`
---
 ALTER TABLE `pedidos`
   ADD PRIMARY KEY (`id`),
   ADD KEY `usuario_id` (`usuario_id`);
 
---
--- Indexes for table `pedido_itens`
---
 ALTER TABLE `pedido_itens`
   ADD PRIMARY KEY (`id`),
   ADD KEY `pedido_id` (`pedido_id`),
   ADD KEY `servico_id` (`servico_id`);
 
---
--- Indexes for table `servicos`
---
 ALTER TABLE `servicos`
   ADD PRIMARY KEY (`id`);
 
---
--- Indexes for table `usuarios`
---
 ALTER TABLE `usuarios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
 
---
--- AUTO_INCREMENT for dumped tables
---
 
---
--- AUTO_INCREMENT for table `pedidos`
---
 ALTER TABLE `pedidos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `pedido_itens`
---
 ALTER TABLE `pedido_itens`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `servicos`
---
 ALTER TABLE `servicos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `usuarios`
---
 ALTER TABLE `usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
---
--- Constraints for dumped tables
---
 
---
--- Constraints for table `pedidos`
---
 ALTER TABLE `pedidos`
   ADD CONSTRAINT `pedidos_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
 
---
--- Constraints for table `pedido_itens`
---
 ALTER TABLE `pedido_itens`
   ADD CONSTRAINT `pedido_itens_ibfk_1` FOREIGN KEY (`pedido_id`) REFERENCES `pedidos` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `pedido_itens_ibfk_2` FOREIGN KEY (`servico_id`) REFERENCES `servicos` (`id`);
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

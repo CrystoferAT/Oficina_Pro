@@ -1,9 +1,8 @@
 <?php
-    ob_start();
-    session_start();
-    require_once "model/funcoes.php";
-    $pagina = isset($_GET['p']) ? $_GET['p'] : 'home';
-    
+ob_start();
+session_start();
+require_once "model/funcoes.php";
+$pagina = isset($_GET['p']) ? $_GET['p'] : 'home';
 ?>
 <!DOCTYPE html>
 <html lang="pt-br" class="h-100">
@@ -16,15 +15,14 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
         
         <style>
-            html,body {
+            html, body {
                 min-height: 100vh;
                 margin: 0;
                 padding: 0;
             }
-            body{
+            body {
                 display: flex;
                 flex-direction: column;
-
             }
             main {
                 flex: 1;
@@ -53,7 +51,7 @@
                             
                             <?php if ($_SESSION['usuario_nivel'] === 'admin' || $_SESSION['usuario_nivel'] === 'funcionario'): ?>
                                 <li class="nav-item">
-                                    <a class="nav-link <?= $pagina == 'cadastro_usuarios' ? 'active' : '' ?>" href="index.php?p=cadastro_usuarios">Funcionários</a>
+                                    <a class="nav-link <?= $pagina == 'cadastro_usuarios' ? 'active' : '' ?>" href="index.php?p=cadastro_usuarios">Usuários</a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link <?= $pagina == 'cadastro_servicos' ? 'active' : '' ?>" href="index.php?p=cadastro_servicos">Novos Serviços</a>
@@ -61,11 +59,9 @@
                                 <li class="nav-item">
                                     <a class="nav-link <?= $pagina == 'servicos' ? 'active' : '' ?>" href="index.php?p=servicos">Listagem</a>
                                 </li>
-                                
                                 <li class="nav-item">
                                     <a class="nav-link <?= $pagina == 'dash' ? 'active' : '' ?>" href="index.php?p=dash">DashBoard</a>
                                 </li>
-
                                 <li class="nav-item">
                                     <a class="nav-link text-danger" href="logout.php">Sair</a>
                                 </li>
@@ -94,7 +90,6 @@
                     </ul>
                 </div>
             </div>
-            <?php require_once "view/includes/header.php"; ?>
         </nav>
 
         <main class="flex-grow-1">
@@ -121,25 +116,18 @@
                         </div>";
                         break;
                     case 'cadastro_usuarios':
-                        // Mantido para controle de funcionários
-                        verificarAcesso('funcionario');
                         include 'view/cadastroUsuarios.php';
                         break;
                     case 'cadastro':
                         include 'view/cadastro_usuario.php';
                         break;
                     case 'cadastro_servicos':
-                        verificarAcesso('funcionario');
                         include 'view/cadastroServicos.php';
                         break;
                     case 'login':
                         include 'view/login.php';
                         break;
                     case 'servicos':
-                        if ($_SESSION['usuario_nivel'] !== 'admin' && $_SESSION['usuario_nivel'] !== 'funcionario') {
-                            header("Location: index.php?p=home&erro=permissao");
-                            exit;
-                        }
                         include 'view/servicosCadastrados.php';
                         break;
                     case 'Orcamento':
@@ -149,15 +137,17 @@
                         include 'view/carrinho.php';
                         break;
                     case 'dash':
-                        // CORRIGIDO: Permite que funcionários também acessem a tela da Dashboard
-                        verificarAcesso('funcionario');
                         include 'view/dashboard.php';
                         break;
                     case 'pagamento':
                         include 'view/pagamento.php';
                         break;
+                    case 'pedido':
+                        include 'view/pedidoDetalhe.php';
+                        break;
                     case 'sucesso':
                         $numPedido = isset($_GET['pedido']) ? htmlspecialchars($_GET['pedido']) : '';
+                        $cookiePedido = isset($_COOKIE['ultimo_pedido']) ? htmlspecialchars($_COOKIE['ultimo_pedido']) : '';
                         echo "
                         <div class='p-5 mb-4 bg-white border rounded-3 shadow-sm'>
                             <div class='container-fluid py-5 text-center'>
@@ -168,6 +158,7 @@
                                     <span class='fs-5'>Número do seu pedido:</span><br>
                                     <strong class='fs-3 text-primary'>{$numPedido}</strong>
                                 </div>
+                                <p class='small text-secondary mb-4'>Cookie salvo: Pedido #{$cookiePedido}</p>
                                 <br>
                                 <a href='index.php?p=home' class='btn btn-dark btn-lg px-4'>
                                     <i class='bi bi-house-door me-2'></i>Voltar ao Início
@@ -191,7 +182,6 @@
 
         <footer class="bg-dark text-secondary py-3 mt-auto border-top border-secondary text-center">
             <div class="container">
-                <?php require_once "view/includes/footer.php"; ?>
                 <p class="mb-0 small text-uppercase fw-light" style="letter-spacing: 1px;">
                     &copy; <?= date('Y') ?> - Oficina Pro - Sistema de Gestão Interna
                 </p>
