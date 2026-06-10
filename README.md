@@ -37,3 +37,6 @@ Este sistema foi desenvolvido para aplicar conceitos de arquitetura de software,
 
 Side hospedado
 Link : https://oficinapro.site.je/
+Acesso como administrador 
+Usuario: admin@email.com
+Senha: 123
